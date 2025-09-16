@@ -1,0 +1,1 @@
+.reports-grid.manager{grid-template-columns:repeat(auto-fit,minmax(350px,1fr))}.manager .report-card{background:#f8f9fa;border-color:#e1e5e9}.manager .report-card:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.1)}.manager .report-header{padding-bottom:10px;border-bottom:1px solid #e1e5e9} 
