@@ -1,0 +1,74 @@
+.template-selection {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .template-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .template-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .template-card h3 {
+    margin: 0 0 1rem 0;
+    color: #333;
+  }
+  
+  .template-card p {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+  
+  .template-category {
+    background: #007bff;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  
+  .change-template-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+  
+  .change-template-btn:hover {
+    background: #545b62;
+  }
+  
+  /* Dark mode support */
+  .dark-mode .template-card {
+    background: #34495e;
+    border-color: #4a5f7a;
+  }
+  
+  .dark-mode .template-card h3 {
+    color: #ecf0f1;
+  }
+  
+  .dark-mode .template-card p {
+    color: #bdc3c7;
+  }

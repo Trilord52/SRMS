@@ -1,0 +1,25 @@
+# Node dependencies
+backend/node_modules/
+staff_report_management_system/node_modules/
+
+# Env files
+backend/.env
+staff_report_management_system/.env
+
+# Logs
+backend/npm-debug.log*
+staff_report_management_system/npm-debug.log*
+
+# Build outputs
+staff_report_management_system/build/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Misc
+*.local
+*.log
