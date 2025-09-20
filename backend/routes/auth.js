@@ -8,8 +8,8 @@ const router = express.Router();
 // Register new user (managers auto-approved, others need approval)
 router.post('/register', async (req, res) => {
   try {
-    console.log('Registration request received:', req.body);
-    
+    console.log('Registration request received:', { email: req.body.email, role: req.body.role });
+
     const { firstName, lastName, userId, email, password, role, department, phoneNumber } = req.body;
 
     // Validate required fields
