@@ -7,17 +7,31 @@ const path = require('path');
 const fs = require('fs');
 const Template = require('../models/Template'); // Added for template management
 
+const UPLOADS_ROOT = path.resolve(__dirname, '../uploads');
+
+// Resolve a stored filename to an absolute path, refusing anything that would
+// escape UPLOADS_ROOT. Returns null when the name is unsafe.
+const resolveUploadPath = (name) => {
+  if (typeof name !== 'string' || name.length === 0) return null;
+  const safeName = path.basename(name);
+  if (safeName !== name || safeName === '.' || safeName === '..') return null;
+  const resolved = path.join(UPLOADS_ROOT, safeName);
+  if (!resolved.startsWith(UPLOADS_ROOT + path.sep)) return null;
+  return resolved;
+};
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = 'uploads/';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (!fs.existsSync(UPLOADS_ROOT)) {
+      fs.mkdirSync(UPLOADS_ROOT, { recursive: true });
     }
-    cb(null, uploadDir);
+    cb(null, UPLOADS_ROOT);
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    // basename() strips any directory component a client puts in originalname,
+    // which would otherwise write outside the uploads directory.
+    cb(null, Date.now() + '-' + path.basename(file.originalname));
   }
 });
 
@@ -648,32 +662,28 @@ router.put('/:id/review', authenticate, async (req, res) => {
 // Download a file
 router.get('/download/:filename', authenticate, async (req, res) => {
   try {
-    const { filename } = req.params;
-    const filePath = path.join(__dirname, '../uploads', filename);
-    
+    // Strip any directory component: the request must not be able to escape uploads/
+    const safeName = path.basename(req.params.filename);
+    const filePath = resolveUploadPath(req.params.filename);
+
+    if (!filePath) {
+      return res.status(400).json({ message: 'Invalid filename' });
+    }
+
+    // Authorize before revealing whether the file exists.
+    // The file must belong to a report; staff are further limited to their own.
+    const query = { files: safeName };
+    if (req.user.role === 'staff') {
+      query.submittedBy = req.user._id;
+    }
+
+    const report = await Report.findOne(query);
+    if (!report) {
+      return res.status(403).json({ message: 'Access denied to this file' });
+    }
+
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: 'File not found' });
-    }
-
-    // Check if user has access to this file by finding a report that contains it
-    let hasAccess = false;
-    if (req.user.role === 'manager' || req.user.role === 'supervisor') {
-      hasAccess = true;
-    } else {
-      const report = await Report.findOne({
-        $or: [
-          { synchronizationFiles: filename },
-          { backupFiles: filename },
-          { resourceFiles: filename },
-          { files: filename }
-        ],
-        submittedBy: req.user._id
-      });
-      hasAccess = !!report;
-    }
-
-    if (!hasAccess) {
-      return res.status(403).json({ message: 'Access denied to this file' });
     }
 
     res.download(filePath);
@@ -705,8 +715,8 @@ router.delete('/:id', authenticate, async (req, res) => {
     ];
 
     allFiles.forEach(filename => {
-      const filePath = path.join(__dirname, '../uploads', filename);
-      if (fs.existsSync(filePath)) {
+      const filePath = resolveUploadPath(filename);
+      if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     });
@@ -754,8 +764,8 @@ router.delete('/bulk-delete', authenticate, async (req, res) => {
     const uniqueFiles = [...new Set(allFiles)];
 
     uniqueFiles.forEach(filename => {
-      const filePath = path.join(__dirname, '../uploads', filename);
-      if (fs.existsSync(filePath)) {
+      const filePath = resolveUploadPath(filename);
+      if (filePath && fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
     });
