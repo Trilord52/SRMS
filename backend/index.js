@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth');
 const reportRoutes = require('./routes/reports');
 const databaseRoutes = require('./routes/databases');
 const analyticsRoutes = require('./routes/analytics');
+const templateRoutes = require('./routes/templates');
 const app = express();
 
 // Check if environment variables are loaded
@@ -22,35 +23,46 @@ if (!process.env.JWT_SECRET) {
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB Atlas using .env
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected successfully'))
+// Connect to MongoDB using .env
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected successfully'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
-  res.status(500).json({ 
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
-  });
-});
 
 // Routes
 app.use('/auth', authRoutes);
 app.use('/reports', reportRoutes);
 app.use('/databases', databaseRoutes);
 app.use('/analytics', analyticsRoutes);
-app.use('/api/templates', require('./routes/templates'));
+app.use('/api/templates', templateRoutes);
 
-// Health check endpoint
+// Health check endpoint. Reports the database state so a failed connection
+// is not masked by a healthy process.
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  const connected = mongoose.connection.readyState === 1;
+  res.status(connected ? 200 : 503).json({
+    status: connected ? 'OK' : 'DEGRADED',
+    database: connected ? 'connected' : 'disconnected'
+  });
 });
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+// Global error handler. Must be registered after the routes: Express matches
+// error middleware in registration order, so mounting it earlier means route
+// errors never reach it.
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
+});
+
+// Only listen when run directly, so tests can import the app without binding a port.
+if (require.main === module) {
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => console.log(`Server running on port ${port}`));
+}
+
+module.exports = app;
