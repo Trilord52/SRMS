@@ -1,17 +1,21 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 
 console.log('🔍 Checking MongoDB connection...');
 
+// Diagnose whatever the app is actually configured to use, not a hardcoded database.
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/srms';
+
 const checkMongoDB = async () => {
   try {
     console.log('🔌 Attempting to connect to MongoDB...');
-    
-    await mongoose.connect('mongodb://localhost:27017/staff_report_system', {
+
+    await mongoose.connect(uri, {
       serverSelectionTimeoutMS: 3000, // 3 second timeout
     });
-    
+
     console.log('✅ MongoDB is running and accessible!');
-    console.log('📍 Connection: mongodb://localhost:27017/staff_report_system');
+    console.log(`📍 Database: ${mongoose.connection.name}`);
     
     // Test database operations
     const collections = await mongoose.connection.db.listCollections().toArray();

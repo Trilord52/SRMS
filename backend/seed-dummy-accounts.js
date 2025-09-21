@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('./models/User');
@@ -6,9 +7,13 @@ const User = require('./models/User');
 const connectDB = async () => {
   try {
     console.log('🔌 Connecting to MongoDB...');
-    
-    // Remove deprecated options and add better connection handling
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/staff_report_system', {
+
+    if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI is not defined. Seeding aborted so the wrong database is not populated.');
+      process.exit(1);
+    }
+
+    await mongoose.connect(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000, // 5 second timeout
       socketTimeoutMS: 45000,
     });
