@@ -1,0 +1,2580 @@
+{
+  "capturedAgainst": "http://localhost:5001",
+  "endpointCount": 56,
+  "records": [
+    {
+      "label": "health",
+      "method": "GET",
+      "path": "/health",
+      "role": null,
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{database:string, status:string}",
+      "responseSample": {
+        "status": "OK",
+        "database": "connected"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "login (valid)",
+      "method": "POST",
+      "path": "/auth/login",
+      "role": null,
+      "requestBody": {
+        "email": "staff@bankofabyssinia.com",
+        "password": "<hash>"
+      },
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{token:string, user:{department:string, email:string, firstName:string, id:string, lastName:string, role:string, userId:string}}",
+      "responseSample": {
+        "token": "<jwt>",
+        "user": {
+          "id": "<objectid>",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userId": "STAFF001",
+          "email": "staff@bankofabyssinia.com",
+          "role": "staff",
+          "department": "IT Department"
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "login (wrong password)",
+      "method": "POST",
+      "path": "/auth/login",
+      "role": null,
+      "requestBody": {
+        "email": "staff@bankofabyssinia.com",
+        "password": "<hash>"
+      },
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid credentials"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "login (unknown user)",
+      "method": "POST",
+      "path": "/auth/login",
+      "role": null,
+      "requestBody": {
+        "email": "nobody@bankofabyssinia.com",
+        "password": "<hash>"
+      },
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid credentials"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "login (missing fields)",
+      "method": "POST",
+      "path": "/auth/login",
+      "role": null,
+      "requestBody": {},
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Email and password are required"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "register (non-BOA email)",
+      "method": "POST",
+      "path": "/auth/register",
+      "role": null,
+      "requestBody": {
+        "firstName": "A",
+        "lastName": "B",
+        "userId": "X1",
+        "email": "a@gmail.com",
+        "password": "<hash>"
+      },
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Email must be a valid Bank of Abyssinia email address"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "register (pending approval)",
+      "method": "POST",
+      "path": "/auth/register",
+      "role": null,
+      "requestBody": {
+        "firstName": "Contract",
+        "lastName": "Probe",
+        "userId": "CP7301",
+        "email": "contract.probe.7301@bankofabyssinia.com",
+        "password": "<hash>",
+        "role": "staff",
+        "department": "IT",
+        "phoneNumber": "+251900000000"
+      },
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string, user:{approvalStatus:string, email:string, firstName:string, id:string, lastName:string, role:string, userId:string}}",
+      "responseSample": {
+        "message": "Registration submitted successfully. Please wait for approval from the administrator.",
+        "user": {
+          "id": "<objectid>",
+          "firstName": "Contract",
+          "lastName": "Probe",
+          "userId": "CP7301",
+          "email": "contract.probe.7301@bankofabyssinia.com",
+          "role": "staff",
+          "approvalStatus": "pending"
+        }
+      },
+      "expected": 201,
+      "matchedExpectation": true
+    },
+    {
+      "label": "profile",
+      "method": "GET",
+      "path": "/auth/profile",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, approvalStatus:string, approvedAt:string, approvedBy:null, department:string, email:string, firstName:string, isApproved:boolean, lastName:string, phoneNumber:string, registrationDate:string, role:string, userId:string}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "firstName": "John",
+        "lastName": "Doe",
+        "userId": "STAFF001",
+        "email": "staff@bankofabyssinia.com",
+        "role": "staff",
+        "isApproved": true,
+        "approvalStatus": "approved",
+        "approvedBy": null,
+        "approvedAt": "<timestamp>",
+        "department": "IT Department",
+        "phoneNumber": "+251911234567",
+        "registrationDate": "<timestamp>",
+        "__v": 0
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "profile (no token)",
+      "method": "GET",
+      "path": "/auth/profile",
+      "role": null,
+      "requestBody": null,
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. No token provided."
+      },
+      "expected": 401,
+      "matchedExpectation": true
+    },
+    {
+      "label": "staff list (supervisor)",
+      "method": "GET",
+      "path": "/auth/staff",
+      "role": "supervisor",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, approvalStatus:string, approvedAt:string, approvedBy:null, department:string, email:string, firstName:string, isApproved:boolean, lastName:string, phoneNumber:string, registrationDate:string, role:string, userId:string}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userId": "STAFF001",
+          "email": "staff@bankofabyssinia.com",
+          "role": "staff",
+          "isApproved": true,
+          "approvalStatus": "approved",
+          "approvedBy": null,
+          "approvedAt": "<timestamp>",
+          "department": "IT Department",
+          "phoneNumber": "+251911234567",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        },
+        {
+          "_id": "<objectid>",
+          "firstName": "Contract",
+          "lastName": "Probe",
+          "userId": "CP7301",
+          "email": "contract.probe.7301@bankofabyssinia.com",
+          "role": "staff",
+          "isApproved": false,
+          "approvalStatus": "pending",
+          "department": "IT",
+          "phoneNumber": "+251900000000",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "staff list (staff denied)",
+      "method": "GET",
+      "path": "/auth/staff",
+      "role": "staff",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Supervisor or Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "all users (manager)",
+      "method": "GET",
+      "path": "/auth/all-users",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, approvalStatus:string, approvedAt:string, approvedBy:null, department:string, email:string, firstName:string, isApproved:boolean, lastName:string, phoneNumber:string, registrationDate:string, role:string, userId:string}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userId": "STAFF001",
+          "email": "staff@bankofabyssinia.com",
+          "role": "staff",
+          "isApproved": true,
+          "approvalStatus": "approved",
+          "approvedBy": null,
+          "approvedAt": "<timestamp>",
+          "department": "IT Department",
+          "phoneNumber": "+251911234567",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        },
+        {
+          "_id": "<objectid>",
+          "firstName": "Sarah",
+          "lastName": "Johnson",
+          "userId": "SUP001",
+          "email": "supervisor@bankofabyssinia.com",
+          "role": "supervisor",
+          "isApproved": true,
+          "approvalStatus": "approved",
+          "approvedBy": null,
+          "approvedAt": "<timestamp>",
+          "department": "IT Operations",
+          "phoneNumber": "+251922345678",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        },
+        {
+          "_id": "<objectid>",
+          "firstName": "Michael",
+          "lastName": "Smith",
+          "userId": "MGR001",
+          "email": "manager@bankofabyssinia.com",
+          "role": "manager",
+          "isApproved": true,
+          "approvalStatus": "approved",
+          "approvedBy": null,
+          "approvedAt": "<timestamp>",
+          "department": "IT Management",
+          "phoneNumber": "+251933456789",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        },
+        {
+          "_id": "<objectid>",
+          "firstName": "Contract",
+          "lastName": "Probe",
+          "userId": "CP7301",
+          "email": "contract.probe.7301@bankofabyssinia.com",
+          "role": "staff",
+          "isApproved": false,
+          "approvalStatus": "pending",
+          "department": "IT",
+          "phoneNumber": "+251900000000",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "all users (staff denied)",
+      "method": "GET",
+      "path": "/auth/all-users",
+      "role": "staff",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "pending registrations",
+      "method": "GET",
+      "path": "/auth/pending-registrations",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, approvalStatus:string, department:string, email:string, firstName:string, isApproved:boolean, lastName:string, phoneNumber:string, registrationDate:string, role:string, userId:string}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "firstName": "Contract",
+          "lastName": "Probe",
+          "userId": "CP7301",
+          "email": "contract.probe.7301@bankofabyssinia.com",
+          "role": "staff",
+          "isApproved": false,
+          "approvalStatus": "pending",
+          "department": "IT",
+          "phoneNumber": "+251900000000",
+          "registrationDate": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "pending registrations (staff denied)",
+      "method": "GET",
+      "path": "/auth/pending-registrations",
+      "role": "staff",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "create template",
+      "method": "POST",
+      "path": "/api/templates",
+      "role": "manager",
+      "requestBody": {
+        "name": "Contract Capture Weekly Report",
+        "description": "Exercises every field type and validator supported by the schema.",
+        "category": "weekly",
+        "fields": [
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "required": true,
+            "order": 1,
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "required": true,
+            "order": 2,
+            "validators": {
+              "min": 0,
+              "max": 999
+            }
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "required": true,
+            "order": 3
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "required": true,
+            "order": 4,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low"
+              },
+              {
+                "value": "high",
+                "label": "High"
+              }
+            ]
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "order": 5
+          },
+          {
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "order": 6,
+            "validators": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "required": true,
+            "order": 7
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "order": 8
+          }
+        ]
+      },
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, category:string, createdAt:string, createdBy:string, description:string, fields:array<{_id:string, defaultValue:null, label:string, name:string, options:array<empty>, order:number, placeholder:string, readOnly:boolean, required:boolean, type:string, validators:object}>, isActive:boolean, name:string, updatedAt:string, version:number}",
+      "responseSample": {
+        "name": "Contract Capture Weekly Report",
+        "description": "Exercises every field type and validator supported by the schema.",
+        "category": "weekly",
+        "fields": [
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "order": 1,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "validators": {
+              "min": 0,
+              "max": 999
+            },
+            "order": 2,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 3,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low",
+                "_id": "<objectid>"
+              },
+              {
+                "value": "high",
+                "label": "High",
+                "_id": "<objectid>"
+              }
+            ],
+            "order": 4,
+            "readOnly": false,
+            "_id": "<objectid>"
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 5,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "validators": {
+              "maxLength": 2000
+            },
+            "order": 6,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 7,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 8,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          }
+        ],
+        "isActive": true,
+        "version": 1,
+        "createdBy": "<objectid>",
+        "_id": "<objectid>",
+        "createdAt": "<timestamp>",
+        "updatedAt": "<timestamp>",
+        "__v": 0
+      },
+      "expected": 201,
+      "matchedExpectation": true
+    },
+    {
+      "label": "create template (staff denied)",
+      "method": "POST",
+      "path": "/api/templates",
+      "role": "staff",
+      "requestBody": {
+        "name": "Contract Capture Weekly Report",
+        "description": "Exercises every field type and validator supported by the schema.",
+        "category": "weekly",
+        "fields": [
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "required": true,
+            "order": 1,
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "required": true,
+            "order": 2,
+            "validators": {
+              "min": 0,
+              "max": 999
+            }
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "required": true,
+            "order": 3
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "required": true,
+            "order": 4,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low"
+              },
+              {
+                "value": "high",
+                "label": "High"
+              }
+            ]
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "order": 5
+          },
+          {
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "order": 6,
+            "validators": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "required": true,
+            "order": 7
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "order": 8
+          }
+        ]
+      },
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list templates",
+      "method": "GET",
+      "path": "/api/templates",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, category:string, createdAt:string, createdBy:{_id:string, email:string, firstName:string, lastName:string}, description:string, fields:array<object>, isActive:boolean, name:string, updatedAt:string, version:number}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "name": "Contract Capture Weekly Report",
+          "description": "Exercises every field type and validator supported by the schema.",
+          "category": "weekly",
+          "fields": [
+            {
+              "validators": {
+                "minLength": 3,
+                "maxLength": 200
+              },
+              "name": "summary",
+              "type": "text",
+              "label": "Summary",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 1,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "validators": {
+                "min": 0,
+                "max": 999
+              },
+              "name": "incidentCount",
+              "type": "number",
+              "label": "Incident count",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 2,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "periodStart",
+              "type": "date",
+              "label": "Period start",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 3,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "severity",
+              "type": "select",
+              "label": "Severity",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "options": [
+                {
+                  "value": "low",
+                  "label": "Low",
+                  "_id": "<objectid>"
+                },
+                {
+                  "value": "high",
+                  "label": "High",
+                  "_id": "<objectid>"
+                }
+              ],
+              "order": 4,
+              "readOnly": false,
+              "_id": "<objectid>"
+            },
+            {
+              "name": "acknowledged",
+              "type": "checkbox",
+              "label": "Acknowledged",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 5,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "validators": {
+                "maxLength": 2000
+              },
+              "name": "notes",
+              "type": "textarea",
+              "label": "Notes",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 6,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "backupVerified",
+              "type": "yesno",
+              "label": "Backup verified",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 7,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "attachment",
+              "type": "file",
+              "label": "Attachment",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 8,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            }
+          ],
+          "isActive": true,
+          "version": 1,
+          "createdBy": {
+            "_id": "<objectid>",
+            "firstName": "Michael",
+            "lastName": "Smith",
+            "email": "manager@bankofabyssinia.com"
+          },
+          "createdAt": "<timestamp>",
+          "updatedAt": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "available templates",
+      "method": "GET",
+      "path": "/api/templates/available",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{_id:string, category:string, description:string, fields:array<object>, name:string, version:number}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "name": "Contract Capture Weekly Report",
+          "description": "Exercises every field type and validator supported by the schema.",
+          "category": "weekly",
+          "fields": [
+            {
+              "validators": {
+                "minLength": 3,
+                "maxLength": 200
+              },
+              "name": "summary",
+              "type": "text",
+              "label": "Summary",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 1,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "validators": {
+                "min": 0,
+                "max": 999
+              },
+              "name": "incidentCount",
+              "type": "number",
+              "label": "Incident count",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 2,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "periodStart",
+              "type": "date",
+              "label": "Period start",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 3,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "severity",
+              "type": "select",
+              "label": "Severity",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "options": [
+                {
+                  "value": "low",
+                  "label": "Low",
+                  "_id": "<objectid>"
+                },
+                {
+                  "value": "high",
+                  "label": "High",
+                  "_id": "<objectid>"
+                }
+              ],
+              "order": 4,
+              "readOnly": false,
+              "_id": "<objectid>"
+            },
+            {
+              "name": "acknowledged",
+              "type": "checkbox",
+              "label": "Acknowledged",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 5,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "validators": {
+                "maxLength": 2000
+              },
+              "name": "notes",
+              "type": "textarea",
+              "label": "Notes",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 6,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "backupVerified",
+              "type": "yesno",
+              "label": "Backup verified",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": true,
+              "order": 7,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            },
+            {
+              "name": "attachment",
+              "type": "file",
+              "label": "Attachment",
+              "placeholder": "",
+              "defaultValue": null,
+              "required": false,
+              "order": 8,
+              "readOnly": false,
+              "_id": "<objectid>",
+              "options": []
+            }
+          ],
+          "version": 1
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "template schema",
+      "method": "GET",
+      "path": "/api/templates/6a7683e3ee55f2a9e050f835/schema",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{_id:string, category:string, description:string, fields:array<{_id:string, defaultValue:null, label:string, name:string, options:array<empty>, order:number, placeholder:string, readOnly:boolean, required:boolean, type:string, validators:object}>, name:string, version:number}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "name": "Contract Capture Weekly Report",
+        "description": "Exercises every field type and validator supported by the schema.",
+        "category": "weekly",
+        "fields": [
+          {
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 1,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "validators": {
+              "min": 0,
+              "max": 999
+            },
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 2,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 3,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low",
+                "_id": "<objectid>"
+              },
+              {
+                "value": "high",
+                "label": "High",
+                "_id": "<objectid>"
+              }
+            ],
+            "order": 4,
+            "readOnly": false,
+            "_id": "<objectid>"
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 5,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "validators": {
+              "maxLength": 2000
+            },
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 6,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 7,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 8,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          }
+        ],
+        "version": 1
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "update template",
+      "method": "PUT",
+      "path": "/api/templates/6a7683e3ee55f2a9e050f835",
+      "role": "manager",
+      "requestBody": {
+        "name": "Contract Capture Weekly Report",
+        "description": "Updated during contract capture.",
+        "category": "weekly",
+        "fields": [
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "required": true,
+            "order": 1,
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "required": true,
+            "order": 2,
+            "validators": {
+              "min": 0,
+              "max": 999
+            }
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "required": true,
+            "order": 3
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "required": true,
+            "order": 4,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low"
+              },
+              {
+                "value": "high",
+                "label": "High"
+              }
+            ]
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "order": 5
+          },
+          {
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "order": 6,
+            "validators": {
+              "maxLength": 2000
+            }
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "required": true,
+            "order": 7
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "order": 8
+          }
+        ]
+      },
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, category:string, createdAt:string, createdBy:string, description:string, fields:array<{_id:string, defaultValue:null, label:string, name:string, options:array<empty>, order:number, placeholder:string, readOnly:boolean, required:boolean, type:string, validators:object}>, isActive:boolean, lastModifiedBy:string, name:string, updatedAt:string, version:number}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "name": "Contract Capture Weekly Report",
+        "description": "Updated during contract capture.",
+        "category": "weekly",
+        "fields": [
+          {
+            "name": "summary",
+            "type": "text",
+            "label": "Summary",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "validators": {
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "order": 1,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "incidentCount",
+            "type": "number",
+            "label": "Incident count",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "validators": {
+              "min": 0,
+              "max": 999
+            },
+            "order": 2,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "periodStart",
+            "type": "date",
+            "label": "Period start",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 3,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "severity",
+            "type": "select",
+            "label": "Severity",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "options": [
+              {
+                "value": "low",
+                "label": "Low",
+                "_id": "<objectid>"
+              },
+              {
+                "value": "high",
+                "label": "High",
+                "_id": "<objectid>"
+              }
+            ],
+            "order": 4,
+            "readOnly": false,
+            "_id": "<objectid>"
+          },
+          {
+            "name": "acknowledged",
+            "type": "checkbox",
+            "label": "Acknowledged",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 5,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "notes",
+            "type": "textarea",
+            "label": "Notes",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "validators": {
+              "maxLength": 2000
+            },
+            "order": 6,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "backupVerified",
+            "type": "yesno",
+            "label": "Backup verified",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": true,
+            "order": 7,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          },
+          {
+            "name": "attachment",
+            "type": "file",
+            "label": "Attachment",
+            "placeholder": "",
+            "defaultValue": null,
+            "required": false,
+            "order": 8,
+            "readOnly": false,
+            "_id": "<objectid>",
+            "options": []
+          }
+        ],
+        "isActive": true,
+        "version": 2,
+        "createdBy": "<objectid>",
+        "createdAt": "<timestamp>",
+        "updatedAt": "<timestamp>",
+        "__v": 1,
+        "lastModifiedBy": "<objectid>"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "template schema (bad id)",
+      "method": "GET",
+      "path": "/api/templates/000000000000000000000000/schema",
+      "role": "staff",
+      "requestBody": null,
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Template not found"
+      },
+      "expected": 404,
+      "matchedExpectation": true
+    },
+    {
+      "label": "create database",
+      "method": "POST",
+      "path": "/databases",
+      "role": "manager",
+      "requestBody": {
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.1",
+        "osVersion": "Ubuntu 24.04",
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "required": false
+          }
+        ]
+      },
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, createdAt:string, createdBy:string, customFeatures:array<{_id:string, enumOptions:array<empty>, label:string, name:string, required:boolean, type:string}>, database:string, databaseType:string, dbVersion:string, ipAddress:string, isActive:boolean, osVersion:string}",
+      "responseSample": {
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.1",
+        "osVersion": "Ubuntu 24.04",
+        "createdBy": "<objectid>",
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true,
+            "enumOptions": [],
+            "_id": "<objectid>"
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "required": false,
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "_id": "<objectid>"
+          }
+        ],
+        "isActive": true,
+        "_id": "<objectid>",
+        "createdAt": "<timestamp>",
+        "__v": 0
+      },
+      "expected": 201,
+      "matchedExpectation": true
+    },
+    {
+      "label": "create database (staff denied)",
+      "method": "POST",
+      "path": "/databases",
+      "role": "staff",
+      "requestBody": {
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.1",
+        "osVersion": "Ubuntu 24.04",
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "required": false
+          }
+        ]
+      },
+      "status": 403,
+      "contentType": "text/html; charset=utf-8",
+      "responseShape": "string",
+      "responseSample": "Forbidden",
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list databases",
+      "method": "GET",
+      "path": "/databases",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, createdAt:string, createdBy:{_id:string, firstName:string, lastName:string}, customFeatures:array<object>, database:string, databaseType:string, dbVersion:string, ipAddress:string, isActive:boolean, osVersion:string}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "database": "ContractCaptureDB",
+          "databaseType": "PostgreSQL",
+          "ipAddress": "10.0.0.42",
+          "dbVersion": "16.1",
+          "osVersion": "Ubuntu 24.04",
+          "createdBy": {
+            "_id": "<objectid>",
+            "firstName": "Michael",
+            "lastName": "Smith"
+          },
+          "customFeatures": [
+            {
+              "name": "replicaCount",
+              "type": "number",
+              "label": "Replica count",
+              "required": true,
+              "enumOptions": [],
+              "_id": "<objectid>"
+            },
+            {
+              "name": "tier",
+              "type": "enum",
+              "label": "Tier",
+              "required": false,
+              "enumOptions": [
+                "gold",
+                "silver"
+              ],
+              "_id": "<objectid>"
+            }
+          ],
+          "isActive": true,
+          "createdAt": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list all databases",
+      "method": "GET",
+      "path": "/databases/all",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, createdAt:string, createdBy:{_id:string, firstName:string, lastName:string}, customFeatures:array<object>, database:string, databaseType:string, dbVersion:string, ipAddress:string, isActive:boolean, osVersion:string}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "database": "ContractCaptureDB",
+          "databaseType": "PostgreSQL",
+          "ipAddress": "10.0.0.42",
+          "dbVersion": "16.1",
+          "osVersion": "Ubuntu 24.04",
+          "createdBy": {
+            "_id": "<objectid>",
+            "firstName": "Michael",
+            "lastName": "Smith"
+          },
+          "customFeatures": [
+            {
+              "name": "replicaCount",
+              "type": "number",
+              "label": "Replica count",
+              "required": true,
+              "enumOptions": [],
+              "_id": "<objectid>"
+            },
+            {
+              "name": "tier",
+              "type": "enum",
+              "label": "Tier",
+              "required": false,
+              "enumOptions": [
+                "gold",
+                "silver"
+              ],
+              "_id": "<objectid>"
+            }
+          ],
+          "isActive": true,
+          "createdAt": "<timestamp>",
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "get database",
+      "method": "GET",
+      "path": "/databases/6a7683e3ee55f2a9e050f881",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, createdAt:string, createdBy:{_id:string, firstName:string, lastName:string}, customFeatures:array<{_id:string, enumOptions:array<empty>, label:string, name:string, required:boolean, type:string}>, database:string, databaseType:string, dbVersion:string, ipAddress:string, isActive:boolean, osVersion:string}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.1",
+        "osVersion": "Ubuntu 24.04",
+        "createdBy": {
+          "_id": "<objectid>",
+          "firstName": "Michael",
+          "lastName": "Smith"
+        },
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true,
+            "enumOptions": [],
+            "_id": "<objectid>"
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "required": false,
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "_id": "<objectid>"
+          }
+        ],
+        "isActive": true,
+        "createdAt": "<timestamp>",
+        "__v": 0
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "update database",
+      "method": "PUT",
+      "path": "/databases/6a7683e3ee55f2a9e050f881",
+      "role": "manager",
+      "requestBody": {
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.2",
+        "osVersion": "Ubuntu 24.04",
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "required": false
+          }
+        ]
+      },
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, createdAt:string, createdBy:string, customFeatures:array<{_id:string, enumOptions:array<empty>, label:string, name:string, required:boolean, type:string}>, database:string, databaseType:string, dbVersion:string, ipAddress:string, isActive:boolean, osVersion:string}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "database": "ContractCaptureDB",
+        "databaseType": "PostgreSQL",
+        "ipAddress": "10.0.0.42",
+        "dbVersion": "16.2",
+        "osVersion": "Ubuntu 24.04",
+        "createdBy": "<objectid>",
+        "customFeatures": [
+          {
+            "name": "replicaCount",
+            "type": "number",
+            "label": "Replica count",
+            "required": true,
+            "enumOptions": [],
+            "_id": "<objectid>"
+          },
+          {
+            "name": "tier",
+            "type": "enum",
+            "label": "Tier",
+            "required": false,
+            "enumOptions": [
+              "gold",
+              "silver"
+            ],
+            "_id": "<objectid>"
+          }
+        ],
+        "isActive": true,
+        "createdAt": "<timestamp>",
+        "__v": 1
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "submit report (multipart)",
+      "method": "POST",
+      "path": "/reports",
+      "role": "staff",
+      "requestBody": "<multipart>",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:string, templateData:{}, templateId:{_id:string, name:string, version:number}, templateVersion:number, weekNumber:number, year:number}",
+      "responseSample": {
+        "templateId": {
+          "_id": "<objectid>",
+          "name": "Contract Capture Weekly Report",
+          "version": 2
+        },
+        "templateData": {},
+        "templateVersion": 1,
+        "revisionOf": null,
+        "submittedBy": "<objectid>",
+        "submissionDate": "<timestamp>",
+        "reviewStatus": "pending",
+        "files": "<upload-filename>",
+        "_id": "<objectid>",
+        "weekNumber": 32,
+        "year": 2026,
+        "month": 8,
+        "day": 8,
+        "__v": 0
+      },
+      "expected": 201,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list reports (staff scope)",
+      "method": "GET",
+      "path": "/reports",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:object, templateData:object, templateId:object, templateVersion:number, weekNumber:number, year:number}>}",
+      "responseSample": {
+        "reports": [
+          {
+            "_id": "<objectid>",
+            "templateId": {
+              "_id": "<objectid>",
+              "name": "Contract Capture Weekly Report",
+              "category": "weekly",
+              "version": 2
+            },
+            "templateData": {
+              "summary": "Weekly database health check completed.",
+              "incidentCount": 2,
+              "periodStart": "2025-09-15",
+              "severity": "low",
+              "acknowledged": true,
+              "notes": "No action required.",
+              "backupVerified": "yes"
+            },
+            "templateVersion": 1,
+            "revisionOf": null,
+            "submittedBy": {
+              "_id": "<objectid>",
+              "firstName": "John",
+              "lastName": "Doe",
+              "userId": "STAFF001",
+              "email": "staff@bankofabyssinia.com"
+            },
+            "submissionDate": "<timestamp>",
+            "reviewStatus": "pending",
+            "files": "<upload-filename>",
+            "weekNumber": 32,
+            "year": 2026,
+            "month": 8,
+            "day": 8,
+            "__v": 0
+          }
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 1,
+          "totalCount": 1,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list reports (manager scope)",
+      "method": "GET",
+      "path": "/reports",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:object, templateData:object, templateId:object, templateVersion:number, weekNumber:number, year:number}>}",
+      "responseSample": {
+        "reports": [
+          {
+            "_id": "<objectid>",
+            "templateId": {
+              "_id": "<objectid>",
+              "name": "Contract Capture Weekly Report",
+              "category": "weekly",
+              "version": 2
+            },
+            "templateData": {
+              "summary": "Weekly database health check completed.",
+              "incidentCount": 2,
+              "periodStart": "2025-09-15",
+              "severity": "low",
+              "acknowledged": true,
+              "notes": "No action required.",
+              "backupVerified": "yes"
+            },
+            "templateVersion": 1,
+            "revisionOf": null,
+            "submittedBy": {
+              "_id": "<objectid>",
+              "firstName": "John",
+              "lastName": "Doe",
+              "userId": "STAFF001",
+              "email": "staff@bankofabyssinia.com"
+            },
+            "submissionDate": "<timestamp>",
+            "reviewStatus": "pending",
+            "files": "<upload-filename>",
+            "weekNumber": 32,
+            "year": 2026,
+            "month": 8,
+            "day": 8,
+            "__v": 0
+          }
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 1,
+          "totalCount": 1,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "list reports paginated",
+      "method": "GET",
+      "path": "/reports?page=1&limit=5",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:object, templateData:object, templateId:object, templateVersion:number, weekNumber:number, year:number}>}",
+      "responseSample": {
+        "reports": [
+          {
+            "_id": "<objectid>",
+            "templateId": {
+              "_id": "<objectid>",
+              "name": "Contract Capture Weekly Report",
+              "category": "weekly",
+              "version": 2
+            },
+            "templateData": {
+              "summary": "Weekly database health check completed.",
+              "incidentCount": 2,
+              "periodStart": "2025-09-15",
+              "severity": "low",
+              "acknowledged": true,
+              "notes": "No action required.",
+              "backupVerified": "yes"
+            },
+            "templateVersion": 1,
+            "revisionOf": null,
+            "submittedBy": {
+              "_id": "<objectid>",
+              "firstName": "John",
+              "lastName": "Doe",
+              "userId": "STAFF001",
+              "email": "staff@bankofabyssinia.com"
+            },
+            "submissionDate": "<timestamp>",
+            "reviewStatus": "pending",
+            "files": "<upload-filename>",
+            "weekNumber": 32,
+            "year": 2026,
+            "month": 8,
+            "day": 8,
+            "__v": 0
+          }
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 1,
+          "totalCount": 1,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "reports by week",
+      "method": "GET",
+      "path": "/reports/week/38",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<empty>}",
+      "responseSample": {
+        "reports": [],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 0,
+          "totalCount": 0,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "reports by date range",
+      "method": "GET",
+      "path": "/reports/date-range?startDate=2025-01-01&endDate=2026-12-31",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:object, templateData:object, templateId:string, templateVersion:number, weekNumber:number, year:number}>}",
+      "responseSample": {
+        "reports": [
+          {
+            "_id": "<objectid>",
+            "templateId": "<objectid>",
+            "templateData": {
+              "summary": "Weekly database health check completed.",
+              "incidentCount": 2,
+              "periodStart": "2025-09-15",
+              "severity": "low",
+              "acknowledged": true,
+              "notes": "No action required.",
+              "backupVerified": "yes"
+            },
+            "templateVersion": 1,
+            "revisionOf": null,
+            "submittedBy": {
+              "_id": "<objectid>",
+              "firstName": "John",
+              "lastName": "Doe",
+              "userId": "STAFF001",
+              "email": "staff@bankofabyssinia.com"
+            },
+            "submissionDate": "<timestamp>",
+            "reviewStatus": "pending",
+            "files": "<upload-filename>",
+            "weekNumber": 32,
+            "year": 2026,
+            "month": 8,
+            "day": 8,
+            "__v": 0
+          }
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 1,
+          "totalCount": 1,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "weekly summary",
+      "method": "GET",
+      "path": "/reports/weekly-summary",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{_id:{week:number, year:number}, approved:number, completed:number, count:number, pending:number, pendingReview:number, rejected:number}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "count": 1,
+          "completed": 0,
+          "pending": 0,
+          "pendingReview": 1,
+          "approved": 0,
+          "rejected": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "export reports (json)",
+      "method": "GET",
+      "path": "/reports/export?format=json",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:{_id:string, email:string, firstName:string, lastName:string, userId:string}, templateData:{acknowledged:boolean, backupVerified:string, incidentCount:number, notes:string, periodStart:string, severity:string, summary:string}, templateId:{_id:string, category:string, name:string, version:number}, templateVersion:number, weekNumber:number, year:number}>",
+      "responseSample": [
+        {
+          "_id": "<objectid>",
+          "templateId": {
+            "_id": "<objectid>",
+            "name": "Contract Capture Weekly Report",
+            "category": "weekly",
+            "version": 2
+          },
+          "templateData": {
+            "summary": "Weekly database health check completed.",
+            "incidentCount": 2,
+            "periodStart": "2025-09-15",
+            "severity": "low",
+            "acknowledged": true,
+            "notes": "No action required.",
+            "backupVerified": "yes"
+          },
+          "templateVersion": 1,
+          "revisionOf": null,
+          "submittedBy": {
+            "_id": "<objectid>",
+            "firstName": "John",
+            "lastName": "Doe",
+            "userId": "STAFF001",
+            "email": "staff@bankofabyssinia.com"
+          },
+          "submissionDate": "<timestamp>",
+          "reviewStatus": "pending",
+          "files": "<upload-filename>",
+          "weekNumber": 32,
+          "year": 2026,
+          "month": 8,
+          "day": 8,
+          "__v": 0
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "reports by database name",
+      "method": "GET",
+      "path": "/reports/database/ContractCaptureDB",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{pagination:{currentPage:number, hasNextPage:boolean, hasPrevPage:boolean, totalCount:number, totalPages:number}, reports:array<empty>}",
+      "responseSample": {
+        "reports": [],
+        "pagination": {
+          "currentPage": 1,
+          "totalPages": 0,
+          "totalCount": 0,
+          "hasNextPage": false,
+          "hasPrevPage": false
+        }
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "get report",
+      "method": "GET",
+      "path": "/reports/6a7683e3ee55f2a9e050f8a8",
+      "role": "staff",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, day:number, files:array<string>, month:number, reviewStatus:string, revisionOf:null, submissionDate:string, submittedBy:{_id:string, email:string, firstName:string, lastName:string, userId:string}, templateData:{acknowledged:boolean, backupVerified:string, incidentCount:number, notes:string, periodStart:string, severity:string, summary:string}, templateId:string, templateVersion:number, weekNumber:number, year:number}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "templateId": "<objectid>",
+        "templateData": {
+          "summary": "Weekly database health check completed.",
+          "incidentCount": 2,
+          "periodStart": "2025-09-15",
+          "severity": "low",
+          "acknowledged": true,
+          "notes": "No action required.",
+          "backupVerified": "yes"
+        },
+        "templateVersion": 1,
+        "revisionOf": null,
+        "submittedBy": {
+          "_id": "<objectid>",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userId": "STAFF001",
+          "email": "staff@bankofabyssinia.com"
+        },
+        "submissionDate": "<timestamp>",
+        "reviewStatus": "pending",
+        "files": "<upload-filename>",
+        "weekNumber": 32,
+        "year": 2026,
+        "month": 8,
+        "day": 8,
+        "__v": 0
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "review report (reject)",
+      "method": "PUT",
+      "path": "/reports/6a7683e3ee55f2a9e050f8a8/review",
+      "role": "supervisor",
+      "requestBody": {
+        "reviewStatus": "rejected",
+        "reviewComments": "Needs the incident log attached.",
+        "rejectionReason": "Missing incident log"
+      },
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{__v:number, _id:string, day:number, files:array<string>, month:number, rejectionReason:string, reviewComments:string, reviewStatus:string, reviewedAt:string, reviewedBy:{_id:string, firstName:string, lastName:string}, revisionOf:null, submissionDate:string, submittedBy:{_id:string, email:string, firstName:string, lastName:string, userId:string}, supervisorComments:string, templateData:{acknowledged:boolean, backupVerified:string, incidentCount:number, notes:string, periodStart:string, severity:string, summary:string}, templateId:string, templateVersion:number, weekNumber:number, year:number}",
+      "responseSample": {
+        "_id": "<objectid>",
+        "templateId": "<objectid>",
+        "templateData": {
+          "summary": "Weekly database health check completed.",
+          "incidentCount": 2,
+          "periodStart": "2025-09-15",
+          "severity": "low",
+          "acknowledged": true,
+          "notes": "No action required.",
+          "backupVerified": "yes"
+        },
+        "templateVersion": 1,
+        "revisionOf": null,
+        "submittedBy": {
+          "_id": "<objectid>",
+          "firstName": "John",
+          "lastName": "Doe",
+          "userId": "STAFF001",
+          "email": "staff@bankofabyssinia.com"
+        },
+        "submissionDate": "<timestamp>",
+        "reviewStatus": "rejected",
+        "files": "<upload-filename>",
+        "weekNumber": 32,
+        "year": 2026,
+        "month": 8,
+        "day": 8,
+        "__v": 0,
+        "rejectionReason": "Missing incident log",
+        "reviewComments": "Needs the incident log attached.",
+        "reviewedAt": "<timestamp>",
+        "reviewedBy": {
+          "_id": "<objectid>",
+          "firstName": "Sarah",
+          "lastName": "Johnson"
+        },
+        "supervisorComments": ""
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "review report (staff denied)",
+      "method": "PUT",
+      "path": "/reports/6a7683e3ee55f2a9e050f8a8/review",
+      "role": "staff",
+      "requestBody": {
+        "reviewStatus": "approved"
+      },
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Supervisor or Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal ..%2F.env",
+      "method": "GET",
+      "path": "/reports/download/..%2F.env",
+      "role": "staff",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal ..%2F.env (manager)",
+      "method": "GET",
+      "path": "/reports/download/..%2F.env",
+      "role": "manager",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal ..%2F..%2F..%2Fetc%2Fpasswd",
+      "method": "GET",
+      "path": "/reports/download/..%2F..%2F..%2Fetc%2Fpasswd",
+      "role": "staff",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal ..%2F..%2F..%2Fetc%2Fpasswd (manager)",
+      "method": "GET",
+      "path": "/reports/download/..%2F..%2F..%2Fetc%2Fpasswd",
+      "role": "manager",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal %2e%2e%2f.env",
+      "method": "GET",
+      "path": "/reports/download/%2e%2e%2f.env",
+      "role": "staff",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download traversal %2e%2e%2f.env (manager)",
+      "method": "GET",
+      "path": "/reports/download/%2e%2e%2f.env",
+      "role": "manager",
+      "requestBody": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Invalid filename"
+      },
+      "expected": 400,
+      "matchedExpectation": true
+    },
+    {
+      "label": "download unowned file",
+      "method": "GET",
+      "path": "/reports/download/does-not-exist.png",
+      "role": "manager",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied to this file"
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "analytics dashboard",
+      "method": "GET",
+      "path": "/analytics/dashboard",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{analytics:{completedReports:number, pendingReports:number, performanceMetrics:{averageResponseTime:number, completionRate:string, submissionTrend:array<object>}, period:string, reviewStats:{approved:number, pending:number, rejected:number}, totalReports:number}, databasePerformance:array<{approvedReports:number, averageResponseTime:number, count:number, database:string, lastReport:string, pendingReports:number, performanceScore:number, reportsCount:number, reviewStats:object, totalReports:number}>, recentReports:array<{__v:number, _id:string, day:number, files:array<string>, month:number, rejectionReason:string, reviewComments:string, reviewStatus:string, reviewedAt:string, reviewedBy:object, revisionOf:null, submissionDate:string, submittedBy:object, supervisorComments:string, templateData:object, templateId:object, templateVersion:number, weekNumber:number, year:number}>, staffPerformance:array<{approvedReports:number, averageResponseTime:number, department:string, email:string, lastSubmission:string, pendingReports:number, performanceScore:number, reviewStats:object, staffId:string, staffName:string, totalReports:number}>}",
+      "responseSample": {
+        "analytics": {
+          "period": "weekly",
+          "totalReports": 1,
+          "completedReports": 0,
+          "pendingReports": 0,
+          "reviewStats": {
+            "pending": 0,
+            "approved": 0,
+            "rejected": 1
+          },
+          "performanceMetrics": {
+            "completionRate": "0.00",
+            "averageResponseTime": 0,
+            "submissionTrend": [
+              {
+                "label": "W29",
+                "count": 0
+              },
+              {
+                "label": "W30",
+                "count": 0
+              },
+              {
+                "label": "W31",
+                "count": 1
+              },
+              {
+                "label": "W32",
+                "count": 0
+              }
+            ]
+          }
+        },
+        "staffPerformance": [
+          {
+            "staffId": "<objectid>",
+            "staffName": "John Doe",
+            "email": "staff@bankofabyssinia.com",
+            "department": "IT Department",
+            "totalReports": 1,
+            "approvedReports": 0,
+            "pendingReports": 0,
+            "reviewStats": {
+              "pending": 0,
+              "approved": 0,
+              "rejected": 1
+            },
+            "averageResponseTime": 0,
+            "lastSubmission": "<timestamp>",
+            "performanceScore": 20
+          }
+        ],
+        "databasePerformance": [
+          {
+            "database": "Contract Capture Weekly Report",
+            "totalReports": 1,
+            "approvedReports": 0,
+            "pendingReports": 0,
+            "reviewStats": {
+              "pending": 0,
+              "approved": 0,
+              "rejected": 1
+            },
+            "averageResponseTime": 0,
+            "lastReport": "<timestamp>",
+            "performanceScore": 20,
+            "count": 1,
+            "reportsCount": 1
+          }
+        ],
+        "recentReports": [
+          {
+            "_id": "<objectid>",
+            "templateId": {
+              "_id": "<objectid>",
+              "name": "Contract Capture Weekly Report"
+            },
+            "templateData": {
+              "summary": "Weekly database health check completed.",
+              "incidentCount": 2,
+              "periodStart": "2025-09-15",
+              "severity": "low",
+              "acknowledged": true,
+              "notes": "No action required.",
+              "backupVerified": "yes"
+            },
+            "templateVersion": 1,
+            "revisionOf": null,
+            "submittedBy": {
+              "_id": "<objectid>",
+              "firstName": "John",
+              "lastName": "Doe",
+              "userId": "STAFF001",
+              "email": "staff@bankofabyssinia.com",
+              "department": "IT Department"
+            },
+            "submissionDate": "<timestamp>",
+            "reviewStatus": "rejected",
+            "files": "<upload-filename>",
+            "weekNumber": 32,
+            "year": 2026,
+            "month": 8,
+            "day": 8,
+            "__v": 0,
+            "rejectionReason": "Missing incident log",
+            "reviewComments": "Needs the incident log attached.",
+            "reviewedAt": "<timestamp>",
+            "reviewedBy": {
+              "_id": "<objectid>",
+              "firstName": "Sarah",
+              "lastName": "Johnson"
+            },
+            "supervisorComments": ""
+          }
+        ]
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "analytics dashboard (staff denied)",
+      "method": "GET",
+      "path": "/analytics/dashboard",
+      "role": "staff",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Manager or Supervisor role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "staff performance",
+      "method": "GET",
+      "path": "/analytics/staff-performance",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{approvedReports:number, averageResponseTime:number, department:string, email:string, lastSubmission:string, pendingReports:number, performanceScore:number, reviewStats:{approved:number, pending:number, rejected:number}, staffId:string, staffName:string, totalReports:number}>",
+      "responseSample": [
+        {
+          "staffId": "<objectid>",
+          "staffName": "John Doe",
+          "email": "staff@bankofabyssinia.com",
+          "department": "IT Department",
+          "totalReports": 1,
+          "approvedReports": 0,
+          "pendingReports": 0,
+          "reviewStats": {
+            "pending": 0,
+            "approved": 0,
+            "rejected": 1
+          },
+          "averageResponseTime": 0,
+          "lastSubmission": "<timestamp>",
+          "performanceScore": 20
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "database performance",
+      "method": "GET",
+      "path": "/analytics/database-performance",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "array<{approvedReports:number, averageResponseTime:number, count:number, database:string, lastReport:string, pendingReports:number, performanceScore:number, reportsCount:number, reviewStats:{approved:number, pending:number, rejected:number}, totalReports:number}>",
+      "responseSample": [
+        {
+          "database": "Contract Capture Weekly Report",
+          "totalReports": 1,
+          "approvedReports": 0,
+          "pendingReports": 0,
+          "reviewStats": {
+            "pending": 0,
+            "approved": 0,
+            "rejected": 1
+          },
+          "averageResponseTime": 0,
+          "lastReport": "<timestamp>",
+          "performanceScore": 20,
+          "count": 1,
+          "reportsCount": 1
+        }
+      ],
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "delete report (staff denied)",
+      "method": "DELETE",
+      "path": "/reports/6a7683e3ee55f2a9e050f8a8",
+      "role": "staff",
+      "requestBody": null,
+      "status": 403,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Access denied. Manager role required."
+      },
+      "expected": 403,
+      "matchedExpectation": true
+    },
+    {
+      "label": "delete report",
+      "method": "DELETE",
+      "path": "/reports/6a7683e3ee55f2a9e050f8a8",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Report deleted successfully"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "delete database",
+      "method": "DELETE",
+      "path": "/databases/6a7683e3ee55f2a9e050f881",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Database deactivated successfully"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "reactivate database",
+      "method": "PUT",
+      "path": "/databases/6a7683e3ee55f2a9e050f881/reactivate",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Database reactivated successfully"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    },
+    {
+      "label": "delete template",
+      "method": "DELETE",
+      "path": "/api/templates/6a7683e3ee55f2a9e050f835",
+      "role": "manager",
+      "requestBody": null,
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "responseShape": "{message:string}",
+      "responseSample": {
+        "message": "Template deleted successfully"
+      },
+      "expected": 200,
+      "matchedExpectation": true
+    }
+  ]
+}

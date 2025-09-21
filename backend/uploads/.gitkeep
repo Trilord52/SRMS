@@ -1,0 +1,2 @@
+# Keeps the uploads directory present in a fresh clone.
+# Contents are runtime data and are not tracked.

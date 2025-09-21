@@ -2,17 +2,21 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node seed-dummy-accounts.js",
     "check-mongodb": "node check-mongodb.js",
+    "capture-contract": "node scripts/capture-contract.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Trilord52",
   "license": "ISC",
-  "description": "",
+  "description": "Staff Report Management System API",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
