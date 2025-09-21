@@ -23,3 +23,6 @@ Thumbs.db
 # Misc
 *.local
 *.log
+
+# Uploaded files are runtime data, not source.
+backend/uploads/
