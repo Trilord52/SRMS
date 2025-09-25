@@ -4,6 +4,8 @@ import { config } from './config/env';
 import { isDatabaseConnected } from './db/connect';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { authRouter } from './routes/auth.routes';
+import { reportsRouter } from './routes/reports.routes';
+import { templatesRouter } from './routes/templates.routes';
 
 /**
  * Builds the Express application without starting a listener, so tests can
@@ -43,6 +45,8 @@ export function createApp(): Express {
   });
 
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/templates', templatesRouter);
+  app.use('/api/v1/reports', reportsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

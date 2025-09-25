@@ -151,3 +151,53 @@ describe('createTemplateSchema', () => {
     }
   });
 });
+
+describe('custom validator messages', () => {
+  it('uses the template author message when a text constraint fails', () => {
+    const schema = buildTemplateDataSchema([
+      {
+        name: 'ticket',
+        type: 'text',
+        label: 'Ticket reference',
+        required: true,
+        validators: { pattern: '^INC-\\d{4}$', customMessage: 'Use the form INC-0000' },
+      },
+    ]);
+
+    const result = schema.safeParse({ ticket: 'nope' });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toBe('Use the form INC-0000');
+  });
+
+  it('uses the author message when a number is out of range', () => {
+    const schema = buildTemplateDataSchema([
+      {
+        name: 'count',
+        type: 'number',
+        label: 'Count',
+        required: true,
+        validators: { min: 0, max: 10, customMessage: 'Count must be between 0 and 10' },
+      },
+    ]);
+
+    const result = schema.safeParse({ count: 99 });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toBe('Count must be between 0 and 10');
+  });
+
+  it('uses the author message when a required checkbox is unticked', () => {
+    const schema = buildTemplateDataSchema([
+      {
+        name: 'agreed',
+        type: 'checkbox',
+        label: 'Agreed',
+        required: true,
+        validators: { customMessage: 'You must confirm the checklist' },
+      },
+    ]);
+
+    const result = schema.safeParse({ agreed: false });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toBe('You must confirm the checklist');
+  });
+});
