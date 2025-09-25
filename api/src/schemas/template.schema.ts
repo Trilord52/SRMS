@@ -120,21 +120,19 @@ export function buildTemplateDataSchema(fields: readonly FieldDefinition[]): z.Z
   for (const field of fields) {
     let schema = baseSchemaFor(field);
 
-    const message = field.validators?.customMessage ?? undefined;
-
     if (field.required) {
-      // `file` answers are filenames resolved from the upload, and `checkbox`
-      // treats "required" as "must be ticked".
+      // For a checkbox, "required" means it must actually be ticked; every other
+      // type is satisfied by the presence of a valid value.
       if (field.type === 'checkbox') {
         schema = (schema as z.ZodBoolean).refine((value) => value === true, {
-          message: message ?? `${field.label} must be checked`,
+          message: field.validators?.customMessage ?? `${field.label} must be checked`,
         }) as unknown as z.ZodTypeAny;
       }
     } else {
       schema = schema.optional().nullable();
     }
 
-    shape[field.name] = message ? withMessage(schema, message) : schema;
+    shape[field.name] = schema;
   }
 
   // Unknown keys are rejected rather than silently stored, so a client cannot
@@ -142,50 +140,51 @@ export function buildTemplateDataSchema(fields: readonly FieldDefinition[]): z.Z
   return z.object(shape).strict();
 }
 
-function withMessage(schema: z.ZodTypeAny, message: string): z.ZodTypeAny {
-  return schema.refine(() => true, { message });
-}
-
 function baseSchemaFor(field: FieldDefinition): z.ZodTypeAny {
   const v = field.validators ?? {};
+  // A template author can supply one message to show instead of the default
+  // wording for whichever constraint the field carries.
+  const custom = v.customMessage ?? undefined;
 
   switch (field.type) {
     case 'text':
     case 'textarea': {
       let s = z.string().trim();
-      if (typeof v.minLength === 'number') s = s.min(v.minLength);
-      if (typeof v.maxLength === 'number') s = s.max(v.maxLength);
+      if (typeof v.minLength === 'number') s = s.min(v.minLength, custom);
+      if (typeof v.maxLength === 'number') s = s.max(v.maxLength, custom);
       else s = s.max(field.type === 'textarea' ? 10_000 : 1_000);
-      if (v.pattern) s = s.regex(new RegExp(v.pattern));
-      if (field.required) s = s.min(Math.max(1, v.minLength ?? 1), `${field.label} is required`);
+      if (v.pattern) s = s.regex(new RegExp(v.pattern), custom);
+      if (field.required) {
+        s = s.min(Math.max(1, v.minLength ?? 1), custom ?? `${field.label} is required`);
+      }
       return s;
     }
 
     case 'number': {
       let s = z.coerce.number();
-      if (typeof v.min === 'number') s = s.min(v.min);
-      if (typeof v.max === 'number') s = s.max(v.max);
+      if (typeof v.min === 'number') s = s.min(v.min, custom);
+      if (typeof v.max === 'number') s = s.max(v.max, custom);
       return s;
     }
 
     case 'date':
-      return z.coerce.date();
+      return z.coerce.date(custom ? { error: custom } : undefined);
 
     case 'select': {
       const values = (field.options ?? []).map((option) => option.value);
       if (values.length === 0) return z.string();
-      return z.enum(values as [string, ...string[]]);
+      return z.enum(values as [string, ...string[]], custom ? { error: custom } : undefined);
     }
 
     case 'checkbox':
-      return z.boolean();
+      return z.boolean(custom ? { error: custom } : undefined);
 
     case 'yesno':
-      return z.enum(['yes', 'no']);
+      return z.enum(['yes', 'no'], custom ? { error: custom } : undefined);
 
     case 'file':
       // The value is the stored filename produced by the upload step.
-      return z.string().min(1);
+      return z.string().min(1, custom);
 
     default: {
       // Exhaustiveness guard: adding a field type without handling it here is a
