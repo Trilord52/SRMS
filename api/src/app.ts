@@ -3,7 +3,9 @@ import express, { type Express } from 'express';
 import { config } from './config/env';
 import { isDatabaseConnected } from './db/connect';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { analyticsRouter } from './routes/analytics.routes';
 import { authRouter } from './routes/auth.routes';
+import { databasesRouter } from './routes/databases.routes';
 import { reportsRouter } from './routes/reports.routes';
 import { templatesRouter } from './routes/templates.routes';
 
@@ -47,6 +49,8 @@ export function createApp(): Express {
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/templates', templatesRouter);
   app.use('/api/v1/reports', reportsRouter);
+  app.use('/api/v1/databases', databasesRouter);
+  app.use('/api/v1/analytics', analyticsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

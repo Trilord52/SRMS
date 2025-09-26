@@ -21,10 +21,11 @@ const customFeatureSchema = new Schema(
 
 const databaseSchema = new Schema(
   {
-    database: { type: String, required: true, trim: true },
+    /** Renamed from the legacy `database`, which read as a type rather than a name. */
+    name: { type: String, required: true, trim: true },
     databaseType: { type: String, required: true, trim: true },
-    /** Validated as an IPv4 address or hostname at the schema layer. */
-    ipAddress: { type: String, required: true, trim: true },
+    /** Renamed from `ipAddress`: a hostname is equally valid. Validated by the schema layer. */
+    host: { type: String, required: true, trim: true },
     dbVersion: { type: String, required: true, trim: true },
     osVersion: { type: String, required: true, trim: true },
     customFeatures: { type: [customFeatureSchema], default: [] },
@@ -34,7 +35,7 @@ const databaseSchema = new Schema(
   { timestamps: true }
 );
 
-databaseSchema.index({ isActive: 1, database: 1 });
+databaseSchema.index({ isActive: 1, name: 1 });
 databaseSchema.index({ createdBy: 1 });
 
 databaseSchema.set('toJSON', {
