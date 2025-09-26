@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "verify-parity": "tsx src/scripts/verifyParity.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

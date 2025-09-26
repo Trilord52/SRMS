@@ -180,7 +180,7 @@ reportsRouter.patch(
     if (!report) throw notFound('Report');
 
     // Only the author may edit, and only while the report is still unreviewed.
-    if (report.submittedBy.toString() !== req.auth!.userId) {
+    if (idOf(report.submittedBy) !== req.auth!.userId) {
       throw forbidden('Only the submitter can edit a report');
     }
     if (report.reviewStatus !== 'pending') {
@@ -258,7 +258,7 @@ reportsRouter.post(
     }
 
     // A reviewer cannot rule on their own submission.
-    if (report.submittedBy.toString() === req.auth!.userId) {
+    if (idOf(report.submittedBy) === req.auth!.userId) {
       throw forbidden('You cannot review your own report');
     }
 
@@ -350,8 +350,24 @@ function buildReportFilter(query: ListReportsQuery, req: Request): Record<string
   return filter;
 }
 
+/**
+ * Reads an id that may or may not have been populated.
+ *
+ * After `.populate('submittedBy')` the field holds a document rather than an
+ * ObjectId, and calling toString() on a document yields its inspect output, not
+ * the id. Comparing that against a user id silently fails, which denied owners
+ * access to their own reports.
+ */
+function idOf(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object' && '_id' in (value as Record<string, unknown>)) {
+    return String((value as { _id: unknown })._id);
+  }
+  return String(value);
+}
+
 function assertCanViewReport(report: ReportDocument, req: Request): void {
-  const isOwner = report.submittedBy.toString() === req.auth!.userId;
+  const isOwner = idOf(report.submittedBy) === req.auth!.userId;
   const isReviewer = CAN_REVIEW_REPORTS.includes(req.auth!.role);
 
   if (!isOwner && !isReviewer) {
@@ -365,7 +381,7 @@ async function loadRevisionTarget(revisionOf: string, req: Request): Promise<Rep
   const original = await ReportModel.findById(revisionOf);
   if (!original) throw notFound('Report being revised');
 
-  if (original.submittedBy.toString() !== req.auth!.userId) {
+  if (idOf(original.submittedBy) !== req.auth!.userId) {
     throw forbidden('You can only revise your own report');
   }
   if (original.reviewStatus !== 'rejected') {
