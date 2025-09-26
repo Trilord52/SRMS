@@ -66,7 +66,7 @@ const validAnswers = {
   backupVerified: 'yes',
 };
 
-async function createTemplate(body: unknown = fullTemplate): Promise<string> {
+async function createTemplate(body: object = fullTemplate): Promise<string> {
   const res = await request(app)
     .post('/api/v1/templates')
     .set(authHeader(manager))
