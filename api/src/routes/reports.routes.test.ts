@@ -303,6 +303,32 @@ describe('report visibility', () => {
     }
   });
 
+  it('lets the author fetch their own report by id', async () => {
+    const id = await createTemplate();
+    const created = await submitReport(id, validAnswers, staff);
+
+    const res = await request(app)
+      .get(`/api/v1/reports/${created.body.report._id}`)
+      .set(authHeader(staff));
+
+    // The handler populates submittedBy, so the owner check must read the id off
+    // the populated document rather than stringifying it.
+    expect(res.status).toBe(200);
+    expect(res.body.report._id).toBe(created.body.report._id);
+  });
+
+  it('lets a reviewer fetch any report by id', async () => {
+    const id = await createTemplate();
+    const created = await submitReport(id, validAnswers, staff);
+
+    for (const actor of [supervisor, manager]) {
+      const res = await request(app)
+        .get(`/api/v1/reports/${created.body.report._id}`)
+        .set(authHeader(actor));
+      expect(res.status).toBe(200);
+    }
+  });
+
   it('answers 404 when staff fetch another persons report by id', async () => {
     const id = await createTemplate();
     const created = await submitReport(id, validAnswers, otherStaff);
