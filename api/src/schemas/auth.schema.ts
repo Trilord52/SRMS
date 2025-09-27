@@ -48,10 +48,20 @@ export const approvalDecisionSchema = z
   .object({
     decision: z.enum(['approved', 'rejected']),
     rejectionReason: z.string().trim().min(1).max(500).optional(),
+    /**
+     * The role the account is granted on approval. Assigning it here rather than
+     * trusting what the registration asked for is what keeps the manager role
+     * under an existing manager's control.
+     */
+    role: z.enum(ROLES).optional(),
   })
   .refine((value) => value.decision !== 'rejected' || Boolean(value.rejectionReason), {
     message: 'A reason is required when rejecting a registration',
     path: ['rejectionReason'],
+  })
+  .refine((value) => value.decision === 'approved' || value.role === undefined, {
+    message: 'A role can only be assigned when approving',
+    path: ['role'],
   });
 
 export const resetPasswordSchema = z.object({
