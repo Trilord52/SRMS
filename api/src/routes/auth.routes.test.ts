@@ -350,3 +350,60 @@ describe('password management', () => {
     expect(res.status).toBe(403);
   });
 });
+
+describe('role assignment at approval', () => {
+  it('grants the role the manager chooses, not the one requested', async () => {
+    const manager = await seedUser(app, 'manager');
+    // The registration asks for staff.
+    await request(app).post('/api/v1/auth/register').send(validRegistration);
+    const pending = await UserModel.findOne({ email: validRegistration.email });
+
+    const res = await request(app)
+      .patch(`/api/v1/auth/registrations/${pending!._id.toString()}`)
+      .set(authHeader(manager))
+      .send({ decision: 'approved', role: 'supervisor' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.role).toBe('supervisor');
+  });
+
+  it('keeps the requested role when the manager does not override it', async () => {
+    const manager = await seedUser(app, 'manager');
+    await request(app).post('/api/v1/auth/register').send(validRegistration);
+    const pending = await UserModel.findOne({ email: validRegistration.email });
+
+    const res = await request(app)
+      .patch(`/api/v1/auth/registrations/${pending!._id.toString()}`)
+      .set(authHeader(manager))
+      .send({ decision: 'approved' });
+
+    expect(res.body.user.role).toBe('staff');
+  });
+
+  it('can promote to manager, which registration itself cannot do', async () => {
+    const manager = await seedUser(app, 'manager');
+    await request(app).post('/api/v1/auth/register').send(validRegistration);
+    const pending = await UserModel.findOne({ email: validRegistration.email });
+
+    const res = await request(app)
+      .patch(`/api/v1/auth/registrations/${pending!._id.toString()}`)
+      .set(authHeader(manager))
+      .send({ decision: 'approved', role: 'manager' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.role).toBe('manager');
+  });
+
+  it('refuses a role alongside a rejection', async () => {
+    const manager = await seedUser(app, 'manager');
+    await request(app).post('/api/v1/auth/register').send(validRegistration);
+    const pending = await UserModel.findOne({ email: validRegistration.email });
+
+    const res = await request(app)
+      .patch(`/api/v1/auth/registrations/${pending!._id.toString()}`)
+      .set(authHeader(manager))
+      .send({ decision: 'rejected', rejectionReason: 'Not an employee', role: 'manager' });
+
+    expect(res.status).toBe(400);
+  });
+});

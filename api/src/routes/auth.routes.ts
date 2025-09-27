@@ -213,7 +213,7 @@ authRouter.patch(
   validate('params', z.object({ userId: objectIdSchema })),
   validate('body', approvalDecisionSchema),
   async (req: Request, res: Response) => {
-    const { decision, rejectionReason } = req.body as ApprovalDecisionInput;
+    const { decision, rejectionReason, role } = req.body as ApprovalDecisionInput;
     const user = await UserModel.findById(req.params.userId);
 
     if (!user) throw notFound('User');
@@ -225,6 +225,12 @@ authRouter.patch(
     user.approvedBy = new Types.ObjectId(req.auth!.userId);
     user.approvedAt = new Date();
     user.rejectionReason = decision === 'rejected' ? (rejectionReason ?? null) : null;
+
+    // The approving manager sets the role. A registration can ask for staff or
+    // supervisor, but the granted role is decided here, which is what keeps
+    // promotion to manager under an existing manager's control.
+    if (decision === 'approved' && role) user.role = role;
+
     await user.save();
 
     res.json({ message: `Registration ${decision}.`, user: user.toJSON() });

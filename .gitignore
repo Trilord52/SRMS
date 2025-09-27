@@ -26,3 +26,14 @@ Thumbs.db
 
 # Uploaded files are runtime data, not source.
 backend/uploads/
+
+# Environment files anywhere in the tree. Only .env.example is committed.
+.env
+**/.env
+!**/.env.example
+
+# Dependencies and build output for the rewritten apps.
+api/node_modules/
+api/dist/
+web/node_modules/
+web/dist/
