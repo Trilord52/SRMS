@@ -44,6 +44,8 @@ export function ApprovalsPage() {
         userId,
         decision,
         rejectionReason: decision === 'rejected' ? reason : undefined,
+        // The role chosen in the row, defaulting to staff to match the control.
+        role: decision === 'approved' ? (roles[userId] ?? 'staff') : undefined,
       });
       setRejectingId(null);
       setReason('');
@@ -109,7 +111,9 @@ export function ApprovalsPage() {
                               [user._id]: event.target.value as Role,
                             }))
                           }
-                          className="h-8 w-36"
+                          // py-0 because the control's default vertical padding
+                          // clips its text at this height.
+                          className="h-9 w-36 py-0"
                         >
                           {ROLES.map((role) => (
                             <option key={role} value={role}>

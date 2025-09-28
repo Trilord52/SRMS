@@ -37,3 +37,6 @@ api/node_modules/
 api/dist/
 web/node_modules/
 web/dist/
+
+# Screenshots from the browser check are build output, not source.
+web/screenshots/
