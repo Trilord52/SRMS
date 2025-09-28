@@ -181,14 +181,19 @@ export function useDecideRegistration() {
       userId,
       decision,
       rejectionReason,
+      role,
     }: {
       userId: string;
       decision: 'approved' | 'rejected';
       rejectionReason?: string;
+      /** The role granted on approval, chosen by the approving manager. */
+      role?: string;
     }) =>
       api.patch(`/api/v1/auth/registrations/${userId}`, {
         decision,
         rejectionReason: rejectionReason || undefined,
+        // Only meaningful on approval; the API rejects it alongside a rejection.
+        role: decision === 'approved' ? role : undefined,
       }),
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ['registrations'] });
