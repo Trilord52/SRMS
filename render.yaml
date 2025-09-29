@@ -1,0 +1,72 @@
+# Render deployment.
+#
+# Two services: the API as a web service, and the interface as a static site.
+# Both build from this repository. Secrets are not declared here — they are set
+# in the Render dashboard, so this file can be committed safely.
+#
+# Uploads live in MongoDB via GridFS rather than on disk, so no persistent volume
+# is needed and a redeploy does not lose attachments.
+
+services:
+  - type: web
+    name: srms-api
+    runtime: node
+    plan: free
+    rootDir: api
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    # Render restarts an instance that fails this, and the endpoint reports the
+    # database state rather than only that the process is alive.
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        # Set in the dashboard. Never committed.
+        sync: false
+      - key: JWT_SECRET
+        # Render generates a value on first deploy; rotating it signs everyone out.
+        generateValue: true
+      - key: CORS_ORIGINS
+        # The static site's own URL, so the API does not accept every origin.
+        fromService:
+          type: web
+          name: srms-web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: MAX_UPLOAD_BYTES
+        value: "10485760"
+      - key: ALLOWED_EMAIL_DOMAIN
+        value: bankofabyssinia.com
+
+  - type: web
+    name: srms-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: false
+    envVars:
+      - key: VITE_API_BASE_URL
+        # Points the built client at the API. The legacy client hardcoded
+        # localhost, so a production build reached the user's own machine.
+        fromService:
+          type: web
+          name: srms-api
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      # A single-page app: unknown paths are served the shell so client-side
+      # routing works on a refresh or a shared link.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
