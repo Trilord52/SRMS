@@ -201,3 +201,44 @@ describe('custom validator messages', () => {
     expect(result.error!.issues[0]!.message).toBe('You must confirm the checklist');
   });
 });
+
+describe('one message per field', () => {
+  it('reports a single error for a short required text answer', () => {
+    const schema = buildTemplateDataSchema([
+      {
+        name: 'summary',
+        type: 'text',
+        label: 'Summary',
+        required: true,
+        validators: { minLength: 10, maxLength: 200 },
+      },
+    ]);
+
+    const result = schema.safeParse({ summary: '1' });
+    expect(result.success).toBe(false);
+
+    // Applying the author's minimum and a separate required minimum used to
+    // produce two complaints about the same box.
+    const forSummary = result.error!.issues.filter((issue) => issue.path[0] === 'summary');
+    expect(forSummary).toHaveLength(1);
+    expect(forSummary[0]!.message).toBe('Summary must be at least 10 characters');
+  });
+
+  it('names the field when a required text answer is empty and no minimum is set', () => {
+    const schema = buildTemplateDataSchema([
+      { name: 'note', type: 'text', label: 'Note', required: true },
+    ]);
+
+    const result = schema.safeParse({ note: '' });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0]!.message).toBe('Note is required');
+  });
+
+  it('still allows an optional text field to be omitted', () => {
+    const schema = buildTemplateDataSchema([
+      { name: 'note', type: 'text', label: 'Note', validators: { minLength: 5 } },
+    ]);
+
+    expect(schema.safeParse({}).success).toBe(true);
+  });
+});
