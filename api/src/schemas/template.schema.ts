@@ -150,13 +150,23 @@ function baseSchemaFor(field: FieldDefinition): z.ZodTypeAny {
     case 'text':
     case 'textarea': {
       let s = z.string().trim();
-      if (typeof v.minLength === 'number') s = s.min(v.minLength, custom);
+
+      // One minimum, not two. Applying the author's minLength and a separate
+      // "required" minimum both produced an error for the same field, so a short
+      // answer reported two complaints about one box.
+      const floor = field.required ? Math.max(1, v.minLength ?? 1) : v.minLength;
+      if (typeof floor === 'number' && floor > 0) {
+        const message =
+          custom ??
+          (v.minLength
+            ? `${field.label} must be at least ${v.minLength} characters`
+            : `${field.label} is required`);
+        s = s.min(floor, message);
+      }
+
       if (typeof v.maxLength === 'number') s = s.max(v.maxLength, custom);
       else s = s.max(field.type === 'textarea' ? 10_000 : 1_000);
       if (v.pattern) s = s.regex(new RegExp(v.pattern), custom);
-      if (field.required) {
-        s = s.min(Math.max(1, v.minLength ?? 1), custom ?? `${field.label} is required`);
-      }
       return s;
     }
 
