@@ -130,8 +130,19 @@ jobs:
           fi
 
           # Connection strings carrying inline credentials.
-          if git grep -nE 'mongodb(\+srv)?://[^:/@[:space:]]+:[^@[:space:]]+@' \
-              -- ':!*.example' ':!.github/*' ':!.planning/*'; then
+          matches=$(git grep -nE 'mongodb(\+srv)?://[^:/@[:space:]]+:[^@[:space:]]+@' \
+            -- ':!*.example' ':!.github/*' ':!.planning/*' || true)
+
+          # Documentation has to show the shape of a connection string, and that
+          # shape necessarily looks like a credential. Placeholders are listed
+          # explicitly rather than excluding whole files, so a real credential in
+          # a README is still caught.
+          real=$(printf '%s\n' "$matches" \
+            | grep -vE 'USER:PASSWORD|<user>:<password>|<username>:<password>|xxxxx' \
+            | grep -v '^$' || true)
+
+          if [ -n "$real" ]; then
+            echo "$real"
             echo "::error::A connection string with an inline password is committed."
             exit 1
           fi
