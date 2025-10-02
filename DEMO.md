@@ -25,32 +25,33 @@ Budget about 15 minutes for setup the first time (mostly `npm install`), and
 | Docker | for MongoDB, or an Atlas cluster instead |
 | A browser | Chrome or Firefox |
 
-Three terminals are easiest: one for the database, one for the API, one for the
-interface.
+Three terminals are easiest: one for the API, one for the interface, one for
+checks. A local database needs a fourth.
 
-### Step 1 — Start MongoDB
+### Step 1 — Choose a database
+
+Either works. Atlas needs no local install and is what the deployed app uses;
+Docker needs no account and works offline.
+
+**Atlas (what this project uses).** Take the connection string from the cluster
+and note two things: it ends at the host, so a database name has to be appended,
+and your current IP has to be allowlisted under Network Access.
+
+```bash
+curl -s https://api.ipify.org        # the IP to add to the allowlist
+```
+
+Nothing else to start — go to step 2.
+
+**Docker, as an alternative:**
 
 ```bash
 docker run -d --name srms-mongo -p 27017:27017 -v srms-mongo-data:/data/db mongo:7
-```
-
-If the container already exists from a previous session, start it instead:
-
-```bash
-docker start srms-mongo
-```
-
-Check it answers:
-
-```bash
+docker start srms-mongo              # if it already exists from a previous run
 docker exec srms-mongo mongosh --quiet --eval 'db.adminCommand({ping:1}).ok'
 ```
 
 Expect `1`. The named volume means data survives a restart.
-
-> Using Atlas instead: add your current IP under Network Access, and put the
-> connection string in `api/.env` in the next step. Find your IP with
-> `curl -s https://api.ipify.org`.
 
 ### Step 2 — Configure and start the API
 
@@ -60,7 +61,17 @@ npm install
 cp .env.example .env
 ```
 
-Open `api/.env` and set two values:
+Open `api/.env` and set two values.
+
+For Atlas — note the `/srms_v2` before the query string, which Atlas does not
+include and without which the driver writes to a database called `test`:
+
+```bash
+MONGODB_URI=mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/srms_v2?retryWrites=true&w=majority
+JWT_SECRET=<paste the output of: openssl rand -hex 32>
+```
+
+For Docker:
 
 ```bash
 MONGODB_URI=mongodb://localhost:27017/srms_v2
